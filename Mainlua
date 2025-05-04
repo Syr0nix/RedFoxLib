@@ -44,6 +44,8 @@ MainFrame.Parent = ScreenGui
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 
 -- Shadow
+local shadowხ
+
 local shadow = Instance.new("ImageLabel")
 shadow.Name = "Shadow"
 shadow.Image = "rbxassetid://1316045217"
@@ -233,6 +235,7 @@ end
 
 -- Create Slider
 function RedFoxUILib.CreateSlider(tab, text, min, max, default, callback)
+    local sliderFrame = Instance.new("Frame")
     local sliderFrame = Instance.new("Frame")
     sliderFrame.Size = UDim2.new(1, -10, 0, 60)
     sliderFrame.Position = UDim2.new(0, 5, 0, 0)
