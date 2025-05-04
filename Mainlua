@@ -1,12 +1,14 @@
--- RedFoxUILib - Full UI Library (Fixed)
-
-if game.CoreGui:FindFirstChild("RedFoxUI") then return end
+-- RedFoxUILib - Full UI Library (Reloadable)
 
 local RedFoxUILib = {}
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local Lighting = game:GetService("Lighting")
+
+-- Remove existing UI if it exists
+local existing = CoreGui:FindFirstChild("RedFoxUI")
+if existing then existing:Destroy() end
 
 -- Blur Effect
 local blur = Instance.new("BlurEffect", Lighting)
