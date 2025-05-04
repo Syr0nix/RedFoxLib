@@ -7,16 +7,15 @@ local CoreGui = game:GetService("CoreGui")
 local Lighting = game:GetService("Lighting")
 
 -- Blur
-local blur = Instance.new("BlurEffect", Lighting)
+local blur = Instance.new("BlurEffect")
 blur.Size = 18
-blur.Enabled = true
-task.delay(5, function()
-	for i = blur.Size, 0, -1 do
-		blur.Size = i
-		task.wait(0.03)
-	end
-	blur.Enabled = false
-end)
+blur.Parent = Lighting
+local startSize = blur.Size or 18
+for i = startSize, 0, -1 do
+	blur.Size = i
+	task.wait(0.03)
+end
+
 
 -- GUI Base
 local ScreenGui = Instance.new("ScreenGui")
