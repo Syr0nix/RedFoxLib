@@ -1,4 +1,3 @@
--- RedFoxUILib - Part 1 (Core + Tabs + Sliders + Toggle Key)
 if game.CoreGui:FindFirstChild("RedFoxUI") then return end
 
 local RedFoxUILib = {}
@@ -19,22 +18,38 @@ task.delay(5, function()
 	blur.Enabled = false
 end)
 
--- Base UI
+-- GUI Base
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "RedFoxUI"
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
+-- Main Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 700, 0, 450)
 MainFrame.Position = UDim2.new(0.5, -350, 0.5, -225)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.ZIndex = 2
 MainFrame.Parent = ScreenGui
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 
+-- Drop Shadow
+local shadow = Instance.new("ImageLabel")
+shadow.Name = "Shadow"
+shadow.Image = "rbxassetid://1316045217"
+shadow.ImageTransparency = 0.7
+shadow.Size = UDim2.new(1, 60, 1, 60)
+shadow.Position = UDim2.new(0.5, -30, 0.5, -30)
+shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+shadow.BackgroundTransparency = 1
+shadow.ZIndex = 1
+shadow.Parent = MainFrame
+
+-- Header
 local Header = Instance.new("Frame")
 Header.Size = UDim2.new(1, 0, 0, 40)
 Header.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
@@ -52,16 +67,17 @@ Title.Size = UDim2.new(1, 0, 1, 0)
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
+-- Tab Bar
 local TabBarScroll = Instance.new("ScrollingFrame")
 TabBarScroll.Size = UDim2.new(1, 0, 0, 35)
 TabBarScroll.Position = UDim2.new(0, 0, 0, 40)
 TabBarScroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 TabBarScroll.BorderSizePixel = 0
 TabBarScroll.ScrollBarThickness = 4
-TabBarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 TabBarScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
 TabBarScroll.ScrollingDirection = Enum.ScrollingDirection.X
 TabBarScroll.HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+TabBarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 TabBarScroll.Parent = MainFrame
 
 local TabLayout = Instance.new("UIListLayout", TabBarScroll)
@@ -69,6 +85,7 @@ TabLayout.FillDirection = Enum.FillDirection.Horizontal
 TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 TabLayout.Padding = UDim.new(0, 6)
 
+-- Content Frame
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Size = UDim2.new(1, 0, 1, -75)
 ContentFrame.Position = UDim2.new(0, 0, 0, 75)
@@ -77,9 +94,19 @@ ContentFrame.BorderSizePixel = 0
 ContentFrame.ClipsDescendants = true
 ContentFrame.Parent = MainFrame
 
+-- Hover FX
+local function AddHoverEffect(obj, baseColor, hoverColor)
+	obj.MouseEnter:Connect(function()
+		TweenService:Create(obj, TweenInfo.new(0.15), {BackgroundColor3 = hoverColor}):Play()
+	end)
+	obj.MouseLeave:Connect(function()
+		TweenService:Create(obj, TweenInfo.new(0.15), {BackgroundColor3 = baseColor}):Play()
+	end)
+end
+
+-- Tabs Table
 RedFoxUILib.Tabs = {}
 RedFoxUILib.ActiveTab = nil
-
 function RedFoxUILib.NewTab(name)
 	local btn = Instance.new("TextButton")
 	btn.Text = name
@@ -91,15 +118,18 @@ function RedFoxUILib.NewTab(name)
 	btn.BorderSizePixel = 0
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 	btn.Parent = TabBarScroll
+	AddHoverEffect(btn, Color3.fromRGB(30, 30, 30), Color3.fromRGB(60, 0, 0))
 
 	local tabScroll = Instance.new("ScrollingFrame")
 	tabScroll.Name = name
 	tabScroll.BackgroundTransparency = 1
 	tabScroll.Size = UDim2.new(1, 0, 1, 0)
+	tabScroll.Position = UDim2.new(1, 0, 0, 0)
 	tabScroll.Visible = false
 	tabScroll.ScrollBarThickness = 6
 	tabScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	tabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	tabScroll.ClipsDescendants = true
 	tabScroll.Parent = ContentFrame
 
 	local layout = Instance.new("UIListLayout", tabScroll)
@@ -109,20 +139,25 @@ function RedFoxUILib.NewTab(name)
 	RedFoxUILib.Tabs[name] = tabScroll
 
 	btn.MouseButton1Click:Connect(function()
-		for _, v in pairs(RedFoxUILib.Tabs) do v.Visible = false end
+		for _, v in pairs(RedFoxUILib.Tabs) do
+			v.Visible = false
+			v.Position = UDim2.new(1, 0, 0, 0)
+		end
 		tabScroll.Visible = true
+		tabScroll.Position = UDim2.new(0, 0, 0, 0)
 		RedFoxUILib.ActiveTab = tabScroll
 	end)
 
 	if not RedFoxUILib.ActiveTab then
 		tabScroll.Visible = true
+		tabScroll.Position = UDim2.new(0, 0, 0, 0)
 		RedFoxUILib.ActiveTab = tabScroll
 	end
 
 	return tabScroll
 end
 
--- F5 toggle
+-- F5 Toggle Key
 UserInputService.InputBegan:Connect(function(input, processed)
 	if not processed and input.KeyCode == Enum.KeyCode.F5 then
 		ScreenGui.Enabled = not ScreenGui.Enabled
@@ -130,7 +165,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 end)
 
--- Dragging
+-- Dragging Frame
 local dragging, dragStart, startPos
 Header.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -142,6 +177,7 @@ Header.InputBegan:Connect(function(input)
 		end)
 	end
 end)
+
 UserInputService.InputChanged:Connect(function(input)
 	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
 		local delta = input.Position - dragStart
@@ -159,8 +195,10 @@ function RedFoxUILib.CreateButton(tab, label, callback)
 	btn.TextColor3 = Color3.fromRGB(255, 0, 0)
 	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 	btn.AutoButtonColor = true
+	btn.BorderSizePixel = 0
 	btn.Parent = tab
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+	AddHoverEffect(btn, Color3.fromRGB(40, 40, 40), Color3.fromRGB(60, 0, 0))
 
 	btn.MouseButton1Click:Connect(callback)
 end
@@ -188,19 +226,79 @@ function RedFoxUILib.CreateToggle(tab, label, default, callback)
 	toggleBtn.TextSize = 12
 	toggleBtn.Size = UDim2.new(0.2, -6, 1, 0)
 	toggleBtn.Position = UDim2.new(0.8, 6, 0, 0)
-	toggleBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
-	toggleBtn.BackgroundColor3 = default and Color3.fromRGB(30, 100, 30) or Color3.fromRGB(50, 50, 50)
+	toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	toggleBtn.BackgroundColor3 = default and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(50, 50, 50)
 	toggleBtn.Parent = holder
 	Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 6)
+
+	AddHoverEffect(toggleBtn, toggleBtn.BackgroundColor3, Color3.fromRGB(180, 0, 0))
 
 	toggleBtn.MouseButton1Click:Connect(function()
 		toggled = not toggled
 		toggleBtn.Text = toggled and "ON" or "OFF"
-		toggleBtn.BackgroundColor3 = toggled and Color3.fromRGB(30, 100, 30) or Color3.fromRGB(50, 50, 50)
+		toggleBtn.BackgroundColor3 = toggled and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(50, 50, 50)
 		callback(toggled)
 	end)
 end
 
+-- Slider
+function RedFoxUILib.CreateSlider(tab, label, min, max, default, callback)
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(1, -12, 0, 50)
+	container.BackgroundTransparency = 1
+	container.Parent = tab
+
+	local text = Instance.new("TextLabel")
+	text.Text = label .. ": " .. default
+	text.Font = Enum.Font.GothamBold
+	text.TextSize = 14
+	text.TextColor3 = Color3.fromRGB(255, 0, 0)
+	text.Size = UDim2.new(1, 0, 0, 20)
+	text.BackgroundTransparency = 1
+	text.Parent = container
+
+	local slider = Instance.new("TextButton")
+	slider.Size = UDim2.new(1, 0, 0, 20)
+	slider.Position = UDim2.new(0, 0, 0, 25)
+	slider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	slider.Text = ""
+	slider.AutoButtonColor = false
+	slider.Parent = container
+	Instance.new("UICorner", slider).CornerRadius = UDim.new(0, 6)
+
+	local fill = Instance.new("Frame")
+	fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+	fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+	fill.BorderSizePixel = 0
+	fill.Parent = slider
+
+	local dragging = false
+	slider.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
+	end)
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local rel = input.Position.X - slider.AbsolutePosition.X
+			local pct = math.clamp(rel / slider.AbsoluteSize.X, 0, 1)
+			TweenService:Create(fill, TweenInfo.new(0.1), {Size = UDim2.new(pct, 0, 1, 0)}):Play()
+			local val = math.floor(min + (max - min) * pct)
+			text.Text = label .. ": " .. val
+			callback(val)
+		end
+	end)
+end
+
+-- Divider Line
+function RedFoxUILib.CreateLine(tab)
+	local line = Instance.new("Frame")
+	line.Size = UDim2.new(1, -12, 0, 1)
+	line.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+	line.BorderSizePixel = 0
+	line.Parent = tab
+end
 -- Dropdown
 function RedFoxUILib.CreateDropdown(tab, label, options, callback)
 	local holder = Instance.new("Frame")
@@ -227,6 +325,7 @@ function RedFoxUILib.CreateDropdown(tab, label, options, callback)
 	dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 	dropdown.Parent = holder
 	Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 6)
+	AddHoverEffect(dropdown, Color3.fromRGB(40, 40, 40), Color3.fromRGB(60, 0, 0))
 
 	local dropFrame = Instance.new("Frame")
 	dropFrame.Visible = false
@@ -234,6 +333,8 @@ function RedFoxUILib.CreateDropdown(tab, label, options, callback)
 	dropFrame.Position = UDim2.new(0, 0, 1, 0)
 	dropFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 	dropFrame.BorderSizePixel = 0
+	dropFrame.ClipsDescendants = true
+	dropFrame.ZIndex = 5
 	dropFrame.Parent = dropdown
 
 	for _, opt in ipairs(options) do
@@ -244,7 +345,9 @@ function RedFoxUILib.CreateDropdown(tab, label, options, callback)
 		optBtn.TextSize = 13
 		optBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
 		optBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		optBtn.BorderSizePixel = 0
 		optBtn.Parent = dropFrame
+		AddHoverEffect(optBtn, Color3.fromRGB(30, 30, 30), Color3.fromRGB(60, 0, 0))
 
 		optBtn.MouseButton1Click:Connect(function()
 			dropdown.Text = opt
@@ -258,7 +361,7 @@ function RedFoxUILib.CreateDropdown(tab, label, options, callback)
 	end)
 end
 
--- TextBox
+-- Textbox
 function RedFoxUILib.CreateTextbox(tab, label, default, callback)
 	local holder = Instance.new("Frame")
 	holder.Size = UDim2.new(1, -12, 0, 55)
@@ -283,6 +386,7 @@ function RedFoxUILib.CreateTextbox(tab, label, default, callback)
 	input.Position = UDim2.new(0, 0, 0, 25)
 	input.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 	input.ClearTextOnFocus = false
+	input.BorderSizePixel = 0
 	input.Parent = holder
 	Instance.new("UICorner", input).CornerRadius = UDim.new(0, 6)
 
@@ -291,4 +395,5 @@ function RedFoxUILib.CreateTextbox(tab, label, default, callback)
 	end)
 end
 
+-- Final return
 return RedFoxUILib
