@@ -1,244 +1,155 @@
+-- RedFoxUILib (Part 1: Core Setup + Tab Framework)
+
 local RedFoxUILib = {}
 
-local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local Lighting = game:GetService("Lighting")
+local CoreGui = game:GetService("CoreGui")
 
--- Prevent duplicates
-local existing = Players.LocalPlayer:FindFirstChild("PlayerGui") and Players.LocalPlayer.PlayerGui:FindFirstChild("RedFoxUI")
-if existing then
-	existing:Destroy()
-	for _, v in ipairs(Lighting:GetChildren()) do
-		if v:IsA("BlurEffect") and v.Name == "RedFoxBlur" then
-			v:Destroy()
-		end
+-- Create base UI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "RedFoxUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+-- Main frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 600, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.BorderSizePixel = 0
+MainFrame.BackgroundTransparency = 0
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
+
+-- Dragging
+local dragging, dragInput, dragStart, startPos
+MainFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = MainFrame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then dragging = false end
+		end)
 	end
+end)
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+UserInputService.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+-- Sidebar for tabs
+local Sidebar = Instance.new("Frame")
+Sidebar.Name = "Sidebar"
+Sidebar.Size = UDim2.new(0, 120, 1, 0)
+Sidebar.Position = UDim2.new(0, 0, 0, 0)
+Sidebar.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = MainFrame
+
+local TabButtons = {}
+
+-- Tab container frame
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Position = UDim2.new(0, 120, 0, 0)
+ContentFrame.Size = UDim2.new(1, -120, 1, 0)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.Parent = MainFrame
+
+-- Glow text utility
+local function createTitleLabel(text)
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.new(1, 0, 0, 40)
+	lbl.BackgroundTransparency = 1
+	lbl.Text = text
+	lbl.TextColor3 = Color3.fromRGB(255, 0, 0)
+	lbl.Font = Enum.Font.GothamBlack
+	lbl.TextSize = 28
+	lbl.TextStrokeTransparency = 0.8
+	lbl.TextXAlignment = Enum.TextXAlignment.Center
+	lbl.TextYAlignment = Enum.TextYAlignment.Center
+	return lbl
 end
 
-function RedFoxUILib:CreateWindow(title)
-	local player = Players.LocalPlayer
-	local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-	screenGui.Name = "RedFoxUI"
-	screenGui.ResetOnSpawn = false
-	screenGui.IgnoreGuiInset = true
+-- Create new tab
+function RedFoxUILib.NewTab(tabName)
+	local tabButton = Instance.new("TextButton")
+	tabButton.Size = UDim2.new(1, 0, 0, 40)
+	tabButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	tabButton.BorderSizePixel = 0
+	tabButton.Text = tabName
+	tabButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+	tabButton.Font = Enum.Font.GothamBold
+	tabButton.TextSize = 16
+	tabButton.Parent = Sidebar
 
-	local blur = Instance.new("BlurEffect", Lighting)
-	blur.Name = "RedFoxBlur"
-	blur.Size = 20
-	task.spawn(function()
-		wait(5)
-		for i = 1, 30 do
-			blur.Size = 20 - (i * (20 / 30))
-			wait(0.03)
+	local tabContent = Instance.new("ScrollingFrame")
+	tabContent.Size = UDim2.new(1, 0, 1, 0)
+	tabContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+	tabContent.ScrollBarThickness = 6
+	tabContent.BackgroundTransparency = 1
+	tabContent.Visible = false
+	tabContent.Parent = ContentFrame
+
+	-- Toggle tab on button click
+	tabButton.MouseButton1Click:Connect(function()
+		for _, btn in pairs(TabButtons) do
+			btn.Content.Visible = false
 		end
-		blur.Enabled = false
+		tabContent.Visible = true
 	end)
 
-	local mainFrame = Instance.new("Frame", screenGui)
-	mainFrame.Size = UDim2.new(0, 720, 0, 460)
-	mainFrame.Position = UDim2.new(0.5, -360, 0.5, -230)
-	mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	mainFrame.BorderSizePixel = 0
-	mainFrame.Active = true
-	mainFrame.Draggable = true
-	Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
+	-- Register the tab
+	table.insert(TabButtons, { Button = tabButton, Content = tabContent })
 
-	local titleBar = Instance.new("TextLabel", mainFrame)
-	titleBar.Size = UDim2.new(1, 0, 0, 40)
-	titleBar.BackgroundTransparency = 1
-	titleBar.Text = title or "RedFox UI"
-	titleBar.TextColor3 = Color3.fromRGB(255, 0, 0)
-	titleBar.Font = Enum.Font.GothamBold
-	titleBar.TextSize = 20
-
-	local tabButtonsFrame = Instance.new("Frame", mainFrame)
-	tabButtonsFrame.Size = UDim2.new(0, 150, 1, -40)
-	tabButtonsFrame.Position = UDim2.new(0, 0, 0, 40)
-	tabButtonsFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	Instance.new("UICorner", tabButtonsFrame).CornerRadius = UDim.new(0, 8)
-
-	local tabLayout = Instance.new("UIListLayout", tabButtonsFrame)
-	tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	tabLayout.Padding = UDim.new(0, 4)
-
-	local contentFrame = Instance.new("Frame", mainFrame)
-	contentFrame.Position = UDim2.new(0, 160, 0, 40)
-	contentFrame.Size = UDim2.new(1, -160, 1, -40)
-	contentFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	Instance.new("UICorner", contentFrame).CornerRadius = UDim.new(0, 6)
-
-	local currentTab
-	local function switchTab(tabContent)
-		if currentTab then currentTab.Visible = false end
-		currentTab = tabContent
-		currentTab.Visible = true
-	end
-
-	function RedFoxUILib:AddTab(tabName)
-		local button = Instance.new("TextButton", tabButtonsFrame)
-		button.Size = UDim2.new(1, -10, 0, 30)
-		button.Text = tabName
-		button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-		button.TextColor3 = Color3.fromRGB(255, 0, 0)
-		button.Font = Enum.Font.Gotham
-		button.TextSize = 14
-		Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-		local tabFrame = Instance.new("ScrollingFrame", contentFrame)
-		tabFrame.Size = UDim2.new(1, -10, 1, -10)
-		tabFrame.Position = UDim2.new(0, 5, 0, 5)
-		tabFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-		tabFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-		tabFrame.ScrollBarThickness = 6
-		tabFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-
-		local tabLayout = Instance.new("UIListLayout", tabFrame)
-		tabLayout.Padding = UDim.new(0, 8)
-		tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-		button.MouseButton1Click:Connect(function()
-			switchTab(tabFrame)
-		end)
-
-		if not currentTab then switchTab(tabFrame) end
-
-		local api = {}
-
-		function api:AddButton(name, callback)
-			local btn = Instance.new("TextButton", tabFrame)
-			btn.Size = UDim2.new(1, -10, 0, 30)
+	return {
+		NewButton = function(name, callback)
+			local btn = Instance.new("TextButton")
+			btn.Size = UDim2.new(0, 200, 0, 32)
+			btn.Position = UDim2.new(0, 10, 0, #tabContent:GetChildren() * 36)
 			btn.Text = name
-			btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-			btn.TextColor3 = Color3.fromRGB(255, 0, 0)
 			btn.Font = Enum.Font.GothamBold
 			btn.TextSize = 14
+			btn.TextColor3 = Color3.fromRGB(255, 0, 0)
+			btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+			btn.BorderSizePixel = 0
+			btn.Parent = tabContent
+
 			btn.MouseButton1Click:Connect(callback)
-			Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+
+			tabContent.CanvasSize = UDim2.new(0, 0, 0, #tabContent:GetChildren() * 36)
+			return btn
+		end,
+
+		Content = tabContent
+	}
+end
+
+-- Show GUI
+function RedFoxUILib.Main(title, toggleKey)
+	local titleLabel = createTitleLabel(title)
+	titleLabel.Position = UDim2.new(0, 120, 0, 0)
+	titleLabel.Parent = MainFrame
+
+	MainFrame.Visible = true
+
+	UserInputService.InputBegan:Connect(function(input)
+		if input.KeyCode == Enum.KeyCode[toggleKey] then
+			MainFrame.Visible = not MainFrame.Visible
 		end
-
-		function api:AddToggle(name, callback)
-			local state = false
-			local toggle = Instance.new("TextButton", tabFrame)
-			toggle.Size = UDim2.new(1, -10, 0, 30)
-			toggle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-			toggle.TextColor3 = Color3.fromRGB(255, 0, 0)
-			toggle.Font = Enum.Font.GothamBold
-			toggle.TextSize = 14
-			toggle.Text = name .. ": OFF"
-			Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
-
-			toggle.MouseButton1Click:Connect(function()
-				state = not state
-				toggle.Text = name .. ": " .. (state and "ON" or "OFF")
-				callback(state)
-			end)
-		end
-
-		function api:AddTextbox(name, callback)
-			local label = Instance.new("TextLabel", tabFrame)
-			label.Text = name
-			label.TextColor3 = Color3.fromRGB(255, 0, 0)
-			label.Font = Enum.Font.Gotham
-			label.TextSize = 13
-			label.BackgroundTransparency = 1
-			label.Size = UDim2.new(1, -10, 0, 20)
-
-			local box = Instance.new("TextBox", tabFrame)
-			box.PlaceholderText = "TextBox"
-			box.Size = UDim2.new(1, -10, 0, 30)
-			box.TextColor3 = Color3.fromRGB(255, 255, 255)
-			box.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-			box.Font = Enum.Font.Gotham
-			box.TextSize = 14
-			Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
-			box.FocusLost:Connect(function()
-				callback(box.Text)
-			end)
-		end
-
-		function api:AddSlider(name, min, max, callback)
-			local label = Instance.new("TextLabel", tabFrame)
-			label.Text = name .. ": " .. min
-			label.TextColor3 = Color3.fromRGB(255, 0, 0)
-			label.Font = Enum.Font.Gotham
-			label.TextSize = 13
-			label.BackgroundTransparency = 1
-			label.Size = UDim2.new(1, -10, 0, 20)
-
-			local slider = Instance.new("Frame", tabFrame)
-			slider.Size = UDim2.new(1, -10, 0, 20)
-			slider.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-			Instance.new("UICorner", slider).CornerRadius = UDim.new(0, 6)
-
-			local fill = Instance.new("Frame", slider)
-			fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-			fill.Size = UDim2.new(0, 0, 1, 0)
-			fill.BorderSizePixel = 0
-			Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 6)
-
-			slider.InputBegan:Connect(function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 then
-					local con = UserInputService.InputChanged:Connect(function(move)
-						if move.UserInputType == Enum.UserInputType.MouseMovement then
-							local rel = (move.Position.X - slider.AbsolutePosition.X) / slider.AbsoluteSize.X
-							rel = math.clamp(rel, 0, 1)
-							fill.Size = UDim2.new(rel, 0, 1, 0)
-							local val = math.floor(min + (max - min) * rel)
-							label.Text = name .. ": " .. val
-							callback(val)
-						end
-					end)
-					UserInputService.InputEnded:Wait()
-					con:Disconnect()
-				end
-			end)
-		end
-
-		function api:AddDropdown(name, options, callback)
-			local label = Instance.new("TextLabel", tabFrame)
-			label.Text = name
-			label.TextColor3 = Color3.fromRGB(255, 0, 0)
-			label.Font = Enum.Font.Gotham
-			label.TextSize = 13
-			label.BackgroundTransparency = 1
-			label.Size = UDim2.new(1, -10, 0, 20)
-
-			local dropdown = Instance.new("TextButton", tabFrame)
-			dropdown.Size = UDim2.new(1, -10, 0, 30)
-			dropdown.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-			dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
-			dropdown.Font = Enum.Font.Gotham
-			dropdown.TextSize = 14
-			dropdown.Text = "Select"
-			Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 6)
-
-			dropdown.MouseButton1Click:Connect(function()
-				local menu = Instance.new("Frame", dropdown)
-				menu.Position = UDim2.new(0, 0, 1, 0)
-				menu.Size = UDim2.new(1, 0, 0, #options * 25)
-				menu.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-				menu.ZIndex = 10
-				menu.ClipsDescendants = true
-
-				for _, opt in ipairs(options) do
-					local btn = Instance.new("TextButton", menu)
-					btn.Size = UDim2.new(1, 0, 0, 25)
-					btn.Text = opt
-					btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-					btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-					btn.Font = Enum.Font.Gotham
-					btn.TextSize = 13
-					btn.MouseButton1Click:Connect(function()
-						dropdown.Text = opt
-						callback(opt)
-						menu:Destroy()
-					end)
-				end
-			end)
-		end
-
-		return api
-	end
+	end)
 
 	return RedFoxUILib
 end
