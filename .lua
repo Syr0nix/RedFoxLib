@@ -1,9 +1,20 @@
--- RedFoxUILib.lua (Modern UI: Blacked Out + Red Accents, Draggable, Blur, Grid Outlines)
+-- RedFoxUILib.lua (Modern UI: Blacked Out + Red Accents, Draggable, Blur, Grid Outlines, Singleton)
 local RedFoxUILib = {}
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
+
+-- Prevent duplicates
+local existing = Players.LocalPlayer:FindFirstChild("PlayerGui") and Players.LocalPlayer.PlayerGui:FindFirstChild("RedFoxUI")
+if existing then
+	existing:Destroy()
+	for _, v in ipairs(Lighting:GetChildren()) do
+		if v:IsA("BlurEffect") and v.Parent == Lighting then
+			v:Destroy()
+		end
+	end
+end
 
 function RedFoxUILib:CreateWindow(title)
 	local player = Players.LocalPlayer
