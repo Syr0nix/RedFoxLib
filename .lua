@@ -23,12 +23,12 @@ function RedFoxUILib:CreateWindow(title)
 	screenGui.ResetOnSpawn = false
 	screenGui.IgnoreGuiInset = true
 
+	-- Temporary blur effect for 5 seconds
 	local blur = Instance.new("BlurEffect")
 	blur.Size = 20
 	blur.Parent = Lighting
-
-	screenGui.AncestryChanged:Connect(function()
-		if not screenGui:IsDescendantOf(game) then
+	task.delay(5, function()
+		if blur and blur.Parent then
 			blur:Destroy()
 		end
 	end)
@@ -126,112 +126,38 @@ function RedFoxUILib:CreateWindow(title)
 
 		local api = {}
 
-		function api:AddButton(text, callback)
-			local btn = Instance.new("TextButton", tabContent)
-			btn.Size = UDim2.new(1, -10, 0, 30)
-			btn.Text = text
-			btn.Font = Enum.Font.GothamBold
-			btn.TextSize = 14
-			btn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-			btn.TextColor3 = Color3.new(1, 1, 1)
-			btn.MouseButton1Click:Connect(callback)
-			Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-			Instance.new("UIStroke", btn).Color = Color3.fromRGB(80, 0, 0)
-		end
-
 		function api:AddToggle(text, callback)
-			local btn = Instance.new("TextButton", tabContent)
-			btn.Size = UDim2.new(1, -10, 0, 30)
-			btn.Text = "[ OFF ] " .. text
-			btn.Font = Enum.Font.Gotham
-			btn.TextSize = 14
-			btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-			btn.TextColor3 = Color3.fromRGB(255, 0, 0)
-			Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-			Instance.new("UIStroke", btn).Color = Color3.fromRGB(60, 0, 0)
+			local frame = Instance.new("Frame", tabContent)
+			frame.Size = UDim2.new(1, -10, 0, 30)
+			frame.BackgroundTransparency = 1
+			local label = Instance.new("TextLabel", frame)
+			label.Size = UDim2.new(0.7, -10, 1, 0)
+			label.Position = UDim2.new(0, 0, 0, 0)
+			label.Text = text
+			label.BackgroundTransparency = 1
+			label.TextColor3 = Color3.fromRGB(255, 0, 0)
+			label.Font = Enum.Font.Gotham
+			label.TextSize = 14
+
+			local toggle = Instance.new("TextButton", frame)
+			toggle.Size = UDim2.new(0.3, -10, 1, 0)
+			toggle.Position = UDim2.new(0.7, 10, 0, 0)
+			toggle.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+			toggle.Text = ""
+			Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 14)
+			local indicator = Instance.new("Frame", toggle)
+			indicator.Size = UDim2.new(0.5, -4, 1, -4)
+			indicator.Position = UDim2.new(0, 2, 0, 2)
+			indicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			indicator.BorderSizePixel = 0
+			Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
 
 			local state = false
-			btn.MouseButton1Click:Connect(function()
+			toggle.MouseButton1Click:Connect(function()
 				state = not state
-				btn.Text = (state and "[ ON  ] " or "[ OFF ] ") .. text
+				indicator:TweenPosition(UDim2.new(state and 1 or 0, state and -indicator.Size.X.Offset - 2 or 2, 0, 2), "Out", "Sine", 0.2, true)
+				toggle.BackgroundColor3 = state and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(60, 0, 0)
 				callback(state)
-			end)
-		end
-
-		function api:AddTextbox(text, callback)
-			local label = Instance.new("TextLabel", tabContent)
-			label.Size = UDim2.new(1, -10, 0, 20)
-			label.Text = text
-			label.Font = Enum.Font.Gotham
-			label.TextSize = 12
-			label.BackgroundTransparency = 1
-			label.TextColor3 = Color3.fromRGB(255, 0, 0)
-
-			local box = Instance.new("TextBox", tabContent)
-			box.Size = UDim2.new(1, -10, 0, 30)
-			box.PlaceholderText = "Type here..."
-			box.TextColor3 = Color3.fromRGB(255, 255, 255)
-			box.Font = Enum.Font.Gotham
-			box.TextSize = 14
-			box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-			Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
-			Instance.new("UIStroke", box).Color = Color3.fromRGB(60, 0, 0)
-			box.FocusLost:Connect(function()
-				callback(box.Text)
-			end)
-		end
-
-		function api:AddSlider(text, min, max, callback)
-			local label = Instance.new("TextLabel", tabContent)
-			label.Size = UDim2.new(1, -10, 0, 20)
-			label.Text = text .. ": " .. min
-			label.Font = Enum.Font.Gotham
-			label.TextSize = 12
-			label.BackgroundTransparency = 1
-			label.TextColor3 = Color3.fromRGB(255, 0, 0)
-
-			local slider = Instance.new("TextButton", tabContent)
-			slider.Size = UDim2.new(1, -10, 0, 20)
-			slider.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-			slider.Text = ""
-			slider.AutoButtonColor = false
-			Instance.new("UICorner", slider).CornerRadius = UDim.new(0, 6)
-			Instance.new("UIStroke", slider).Color = Color3.fromRGB(60, 0, 0)
-
-			local fill = Instance.new("Frame", slider)
-			fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-			fill.Size = UDim2.new(0, 0, 1, 0)
-			fill.BorderSizePixel = 0
-			Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 6)
-
-			local dragging = false
-			slider.InputBegan:Connect(function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 then
-					dragging = true
-					local pos = (input.Position.X - slider.AbsolutePosition.X) / slider.AbsoluteSize.X
-					pos = math.clamp(pos, 0, 1)
-					fill.Size = UDim2.new(pos, 0, 1, 0)
-					local value = math.floor((max - min) * pos + min)
-					label.Text = text .. ": " .. value
-					callback(value)
-				end
-			end)
-
-			UserInputService.InputEnded:Connect(function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 then
-					dragging = false
-				end
-			end)
-
-			UserInputService.InputChanged:Connect(function(input)
-				if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-					local pos = (input.Position.X - slider.AbsolutePosition.X) / slider.AbsoluteSize.X
-					pos = math.clamp(pos, 0, 1)
-					fill.Size = UDim2.new(pos, 0, 1, 0)
-					local value = math.floor((max - min) * pos + min)
-					label.Text = text .. ": " .. value
-					callback(value)
-				end
 			end)
 		end
 
