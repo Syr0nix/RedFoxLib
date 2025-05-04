@@ -1,4 +1,4 @@
--- ✅ RedFoxUILib - Full Working UI Library with Scroll Layout
+-- ✅ RedFoxUILib - Full Working UI Library with Tab Fix, Blur Fade, and Visual Polish
 
 if game.CoreGui:FindFirstChild("RedFoxUI") then return end
 
@@ -8,15 +8,16 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local Lighting = game:GetService("Lighting")
 
--- Fade blur effect
+-- Blur background
 local blur = Instance.new("BlurEffect", Lighting)
-blur.Size = 24
+blur.Size = 18
 blur.Enabled = true
-task.delay(5, function()
-    TweenService:Create(blur, TweenInfo.new(1.5), {Size = 0}):Play()
-    task.wait(1.5)
-    blur:Destroy()
-end)
+
+-- Auto disable blur after 5 seconds
+coroutine.wrap(function()
+    task.wait(5)
+    if blur then blur.Enabled = false end
+end)()
 
 -- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
@@ -29,11 +30,11 @@ ScreenGui.Parent = CoreGui
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 700, 0, 450)
 MainFrame.Position = UDim2.new(0.5, -350, 0.5, -225)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Parent = ScreenGui
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 
 -- Header
 local Header = Instance.new("Frame")
@@ -53,13 +54,12 @@ Title.Size = UDim2.new(1, 0, 1, 0)
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
--- Separator
-local line = Instance.new("Frame")
-line.Size = UDim2.new(1, 0, 0, 1)
-line.Position = UDim2.new(0, 0, 1, -1)
-line.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-line.BorderSizePixel = 0
-line.Parent = Header
+local Line1 = Instance.new("Frame")
+Line1.Size = UDim2.new(1, 0, 0, 1)
+Line1.Position = UDim2.new(0, 0, 1, 0)
+Line1.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+Line1.BorderSizePixel = 0
+Line1.Parent = Header
 
 -- Tab Bar
 local TabBarScroll = Instance.new("ScrollingFrame")
@@ -72,6 +72,7 @@ TabBarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 TabBarScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
 TabBarScroll.ScrollingDirection = Enum.ScrollingDirection.X
 TabBarScroll.HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+TabBarScroll.ClipsDescendants = true
 TabBarScroll.Parent = MainFrame
 
 local TabLayout = Instance.new("UIListLayout", TabBarScroll)
@@ -79,19 +80,18 @@ TabLayout.FillDirection = Enum.FillDirection.Horizontal
 TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 TabLayout.Padding = UDim.new(0, 6)
 
--- Tab separator
-local tabLine = Instance.new("Frame")
-tabLine.Size = UDim2.new(1, 0, 0, 1)
-tabLine.Position = UDim2.new(0, 0, 1, -1)
-tabLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-tabLine.BorderSizePixel = 0
-tabLine.Parent = TabBarScroll
+local Line2 = Instance.new("Frame")
+Line2.Size = UDim2.new(1, 0, 0, 1)
+Line2.Position = UDim2.new(0, 0, 1, 0)
+Line2.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+Line2.BorderSizePixel = 0
+Line2.Parent = TabBarScroll
 
 -- Content Holder
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Size = UDim2.new(1, 0, 1, -75)
 ContentFrame.Position = UDim2.new(0, 0, 0, 75)
-ContentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 ContentFrame.BorderSizePixel = 0
 ContentFrame.ClipsDescendants = true
 ContentFrame.Parent = MainFrame
@@ -110,7 +110,15 @@ function RedFoxUILib.NewTab(name)
     btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     btn.BorderSizePixel = 0
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    btn.AutoButtonColor = false
     btn.Parent = TabBarScroll
+
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
+    end)
 
     local tabScroll = Instance.new("ScrollingFrame")
     tabScroll.Name = name
@@ -166,6 +174,7 @@ end)
 UserInputService.InputBegan:Connect(function(input, processed)
     if not processed and input.KeyCode == Enum.KeyCode.F5 then
         ScreenGui.Enabled = not ScreenGui.Enabled
+        blur.Enabled = ScreenGui.Enabled
     end
 end)
 
