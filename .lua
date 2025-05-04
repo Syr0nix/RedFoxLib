@@ -23,7 +23,6 @@ function RedFoxUILib:CreateWindow(title)
 	screenGui.ResetOnSpawn = false
 	screenGui.IgnoreGuiInset = true
 
-	-- Blur effect
 	local blur = Instance.new("BlurEffect")
 	blur.Size = 20
 	blur.Parent = Lighting
@@ -34,7 +33,6 @@ function RedFoxUILib:CreateWindow(title)
 		end
 	end)
 
-	-- Main Frame
 	local mainFrame = Instance.new("Frame", screenGui)
 	mainFrame.Size = UDim2.new(0, 700, 0, 450)
 	mainFrame.Position = UDim2.new(0.5, -350, 0.5, -225)
@@ -44,11 +42,14 @@ function RedFoxUILib:CreateWindow(title)
 	mainFrame.Draggable = true
 	Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 
-	-- Sidebar
 	local sidebar = Instance.new("Frame", mainFrame)
 	sidebar.Size = UDim2.new(0, 160, 1, 0)
 	sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-	Instance.new("UIListLayout", sidebar).Padding = UDim.new(0, 5)
+	Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0, 6)
+
+	local sidebarLayout = Instance.new("UIListLayout", sidebar)
+	sidebarLayout.Padding = UDim.new(0, 5)
+	sidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 	local titleLabel = Instance.new("TextLabel", sidebar)
 	titleLabel.Size = UDim2.new(1, 0, 0, 40)
@@ -57,6 +58,7 @@ function RedFoxUILib:CreateWindow(title)
 	titleLabel.Font = Enum.Font.GothamBold
 	titleLabel.TextSize = 20
 	titleLabel.BackgroundTransparency = 1
+	titleLabel.LayoutOrder = 0
 
 	local contentFrame = Instance.new("Frame", mainFrame)
 	contentFrame.Position = UDim2.new(0, 160, 0, 0)
@@ -64,7 +66,6 @@ function RedFoxUILib:CreateWindow(title)
 	contentFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 	Instance.new("UICorner", contentFrame).CornerRadius = UDim.new(0, 6)
 
-	-- Notification popup
 	local popup = Instance.new("TextLabel", screenGui)
 	popup.Size = UDim2.new(0, 250, 0, 30)
 	popup.Position = UDim2.new(0, 10, 1, -40)
@@ -101,6 +102,8 @@ function RedFoxUILib:CreateWindow(title)
 		tabButton.TextSize = 14
 		tabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		tabButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+		tabButton.AutoButtonColor = true
+		tabButton.LayoutOrder = 1 + #sidebar:GetChildren()
 		Instance.new("UICorner", tabButton).CornerRadius = UDim.new(0, 6)
 		local stroke = Instance.new("UIStroke", tabButton)
 		stroke.Thickness = 1
