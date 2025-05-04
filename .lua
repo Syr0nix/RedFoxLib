@@ -1,4 +1,4 @@
--- ✅ RedFoxUILib - Full Working UI Library with Blur, Fade, and Enhanced Styling
+-- ✅ RedFoxUILib - Full Working UI Library with Effects & Delayed Blur
 
 if game.CoreGui:FindFirstChild("RedFoxUI") then return end
 
@@ -8,10 +8,15 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local Lighting = game:GetService("Lighting")
 
--- Blur background
-local blur = Instance.new("BlurEffect", Lighting)
-blur.Size = 18
-blur.Enabled = true
+-- Delayed background blur
+local blur = Instance.new("BlurEffect")
+blur.Size = 20
+blur.Enabled = false
+blur.Parent = Lighting
+
+task.delay(5, function()
+	blur.Enabled = true
+end)
 
 -- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
@@ -24,11 +29,11 @@ ScreenGui.Parent = CoreGui
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 700, 0, 450)
 MainFrame.Position = UDim2.new(0.5, -350, 0.5, -225)
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Parent = ScreenGui
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 
 -- Header
 local Header = Instance.new("Frame")
@@ -48,19 +53,19 @@ Title.Size = UDim2.new(1, 0, 1, 0)
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
--- Divider line under header
-local Divider = Instance.new("Frame")
-Divider.Size = UDim2.new(1, 0, 0, 1)
-Divider.Position = UDim2.new(0, 0, 1, 0)
-Divider.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-Divider.BorderSizePixel = 0
-Divider.Parent = Header
+-- Divider below header
+local Divider1 = Instance.new("Frame")
+Divider1.Size = UDim2.new(1, 0, 0, 1)
+Divider1.Position = UDim2.new(0, 0, 1, 0)
+Divider1.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+Divider1.BorderSizePixel = 0
+Divider1.Parent = Header
 
 -- Tab Bar
 local TabBarScroll = Instance.new("ScrollingFrame")
 TabBarScroll.Size = UDim2.new(1, 0, 0, 35)
 TabBarScroll.Position = UDim2.new(0, 0, 0, 40)
-TabBarScroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TabBarScroll.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 TabBarScroll.BorderSizePixel = 0
 TabBarScroll.ScrollBarThickness = 4
 TabBarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -74,7 +79,7 @@ TabLayout.FillDirection = Enum.FillDirection.Horizontal
 TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 TabLayout.Padding = UDim.new(0, 6)
 
--- Divider line under tabs
+-- Divider below tab bar
 local Divider2 = Instance.new("Frame")
 Divider2.Size = UDim2.new(1, 0, 0, 1)
 Divider2.Position = UDim2.new(0, 0, 0, 75)
@@ -84,20 +89,12 @@ Divider2.Parent = MainFrame
 
 -- Content Holder
 local ContentFrame = Instance.new("Frame")
-ContentFrame.Size = UDim2.new(1, 0, 1, -75)
+ContentFrame.Size = UDim2.new(1, 0, 1, -76)
 ContentFrame.Position = UDim2.new(0, 0, 0, 76)
 ContentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 ContentFrame.BorderSizePixel = 0
 ContentFrame.ClipsDescendants = true
 ContentFrame.Parent = MainFrame
-
--- Fade out after 5 seconds
-task.delay(5, function()
-	TweenService:Create(MainFrame, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-	TweenService:Create(ContentFrame, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-	TweenService:Create(Header, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-	TweenService:Create(TabBarScroll, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-end)
 
 -- Tabs
 RedFoxUILib.Tabs = {}
@@ -110,9 +107,13 @@ function RedFoxUILib.NewTab(name)
 	btn.Font = Enum.Font.GothamBold
 	btn.TextSize = 14
 	btn.TextColor3 = Color3.fromRGB(255, 0, 0)
-	btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 	btn.BorderSizePixel = 0
+	btn.AutoButtonColor = true
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+	local stroke = Instance.new("UIStroke", btn)
+	stroke.Color = Color3.fromRGB(255, 0, 0)
+	stroke.Thickness = 0.6
 	btn.Parent = TabBarScroll
 
 	local tabScroll = Instance.new("ScrollingFrame")
