@@ -1,4 +1,4 @@
--- RedFoxUILib.lua (Modern UI with Tabs, Rounded Sliders, Blur, Grid Outlines, Draggable)
+-- RedFoxUILib.lua (Modern UI: Blacked Out + Red Accents, Draggable, Blur, Grid Outlines)
 local RedFoxUILib = {}
 
 local Players = game:GetService("Players")
@@ -27,7 +27,7 @@ function RedFoxUILib:CreateWindow(title)
 	local mainFrame = Instance.new("Frame", screenGui)
 	mainFrame.Size = UDim2.new(0, 700, 0, 450)
 	mainFrame.Position = UDim2.new(0.5, -350, 0.5, -225)
-	mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+	mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 	mainFrame.BorderSizePixel = 0
 	mainFrame.Active = true
 	mainFrame.Draggable = true
@@ -36,13 +36,13 @@ function RedFoxUILib:CreateWindow(title)
 	-- Sidebar
 	local sidebar = Instance.new("Frame", mainFrame)
 	sidebar.Size = UDim2.new(0, 160, 1, 0)
-	sidebar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+	sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 	Instance.new("UIListLayout", sidebar).Padding = UDim.new(0, 5)
 
 	local titleLabel = Instance.new("TextLabel", sidebar)
 	titleLabel.Size = UDim2.new(1, 0, 0, 40)
 	titleLabel.Text = title or "RedFox UI"
-	titleLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+	titleLabel.TextColor3 = Color3.fromRGB(255, 30, 30)
 	titleLabel.Font = Enum.Font.GothamBold
 	titleLabel.TextSize = 20
 	titleLabel.BackgroundTransparency = 1
@@ -50,7 +50,8 @@ function RedFoxUILib:CreateWindow(title)
 	local contentFrame = Instance.new("Frame", mainFrame)
 	contentFrame.Position = UDim2.new(0, 160, 0, 0)
 	contentFrame.Size = UDim2.new(1, -160, 1, 0)
-	contentFrame.BackgroundTransparency = 1
+	contentFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+	Instance.new("UICorner", contentFrame).CornerRadius = UDim.new(0, 6)
 
 	local currentTab
 
@@ -67,16 +68,17 @@ function RedFoxUILib:CreateWindow(title)
 		tabButton.Font = Enum.Font.Gotham
 		tabButton.TextSize = 14
 		tabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		tabButton.TextColor3 = Color3.new(1, 1, 1)
+		tabButton.TextColor3 = Color3.fromRGB(255, 0, 0)
 		Instance.new("UICorner", tabButton).CornerRadius = UDim.new(0, 6)
 		local stroke = Instance.new("UIStroke", tabButton)
 		stroke.Thickness = 1
-		stroke.Color = Color3.fromRGB(60, 60, 60)
+		stroke.Color = Color3.fromRGB(60, 0, 0)
 
 		local tabContent = Instance.new("ScrollingFrame", contentFrame)
 		tabContent.Visible = false
 		tabContent.Size = UDim2.new(1, -20, 1, -20)
 		tabContent.Position = UDim2.new(0, 10, 0, 10)
+		tabContent.BackgroundTransparency = 1
 		tabContent.AutomaticCanvasSize = Enum.AutomaticSize.Y
 		tabContent.ScrollBarThickness = 6
 		Instance.new("UIListLayout", tabContent).Padding = UDim.new(0, 8)
@@ -99,7 +101,7 @@ function RedFoxUILib:CreateWindow(title)
 			btn.TextColor3 = Color3.new(1, 1, 1)
 			btn.MouseButton1Click:Connect(callback)
 			Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-			Instance.new("UIStroke", btn).Color = Color3.fromRGB(60, 60, 60)
+			Instance.new("UIStroke", btn).Color = Color3.fromRGB(80, 0, 0)
 		end
 
 		function api:AddToggle(text, callback)
@@ -108,10 +110,10 @@ function RedFoxUILib:CreateWindow(title)
 			btn.Text = "[ OFF ] " .. text
 			btn.Font = Enum.Font.Gotham
 			btn.TextSize = 14
-			btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-			btn.TextColor3 = Color3.new(1, 1, 1)
+			btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+			btn.TextColor3 = Color3.fromRGB(255, 0, 0)
 			Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-			Instance.new("UIStroke", btn).Color = Color3.fromRGB(60, 60, 60)
+			Instance.new("UIStroke", btn).Color = Color3.fromRGB(60, 0, 0)
 
 			local state = false
 			btn.MouseButton1Click:Connect(function()
@@ -128,17 +130,17 @@ function RedFoxUILib:CreateWindow(title)
 			label.Font = Enum.Font.Gotham
 			label.TextSize = 12
 			label.BackgroundTransparency = 1
-			label.TextColor3 = Color3.new(1, 1, 1)
+			label.TextColor3 = Color3.fromRGB(255, 0, 0)
 
 			local box = Instance.new("TextBox", tabContent)
 			box.Size = UDim2.new(1, -10, 0, 30)
 			box.PlaceholderText = "Type here..."
-			box.TextColor3 = Color3.new(1, 1, 1)
+			box.TextColor3 = Color3.fromRGB(255, 255, 255)
 			box.Font = Enum.Font.Gotham
 			box.TextSize = 14
-			box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+			box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 			Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
-			Instance.new("UIStroke", box).Color = Color3.fromRGB(60, 60, 60)
+			Instance.new("UIStroke", box).Color = Color3.fromRGB(60, 0, 0)
 			box.FocusLost:Connect(function()
 				callback(box.Text)
 			end)
@@ -151,15 +153,15 @@ function RedFoxUILib:CreateWindow(title)
 			label.Font = Enum.Font.Gotham
 			label.TextSize = 12
 			label.BackgroundTransparency = 1
-			label.TextColor3 = Color3.new(1, 1, 1)
+			label.TextColor3 = Color3.fromRGB(255, 0, 0)
 
 			local slider = Instance.new("TextButton", tabContent)
 			slider.Size = UDim2.new(1, -10, 0, 20)
-			slider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+			slider.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 			slider.Text = ""
 			slider.AutoButtonColor = false
 			Instance.new("UICorner", slider).CornerRadius = UDim.new(0, 6)
-			Instance.new("UIStroke", slider).Color = Color3.fromRGB(60, 60, 60)
+			Instance.new("UIStroke", slider).Color = Color3.fromRGB(60, 0, 0)
 
 			local fill = Instance.new("Frame", slider)
 			fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
