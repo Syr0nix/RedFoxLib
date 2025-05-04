@@ -97,7 +97,7 @@ function RedFoxUILib:CreateWindow(title)
         local button = Instance.new("TextButton", tabButtonsFrame)
         button.Size = UDim2.new(1, -10, 0, 30)
         button.Text = tabName
-        button.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+        button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         button.TextColor3 = Color3.fromRGB(255, 0, 0)
         button.Font = Enum.Font.Gotham
         button.TextSize = 14
