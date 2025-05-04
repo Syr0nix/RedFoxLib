@@ -13,11 +13,12 @@ local success, err = pcall(function()
     local blur = Instance.new("BlurEffect", Lighting)
     blur.Size = 18
     blur.Enabled = true
-    task.delay(5, function()
+    coroutine.wrap(function()
+        task.wait(5)
         TweenService:Create(blur, TweenInfo.new(0.54), {Size = 0}):Play()
         task.wait(0.54)
         blur.Enabled = false
-    end)
+    end)()
 end)
 if not success then
     warn("Failed to create BlurEffect: " .. err)
@@ -351,7 +352,7 @@ function RedFoxUILib.CreateDropdown(tab, text, options, callback)
     dropdownButton.Size = UDim2.new(0.5, -5, 0, 30)
     dropdownButton.Position = UDim2.new(0.5, 5, 0.5, -15)
     dropdownButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    dropdownButton.TextColor3 = Color3.fromRGB(255, 255,  Moriarty
     dropdownButton.Font = Enum.Font.Gotham
     dropdownButton.TextSize = 14
     dropdownButton.Text = options[1] or "Select..."
