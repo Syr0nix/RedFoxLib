@@ -125,6 +125,10 @@ function RedFoxUILib.NewTab(name)
     end)
 
     btn.Parent = TabBarScroll
+task.defer(function()
+	TabBarScroll.CanvasPosition = Vector2.new(0, 0)
+end)
+
 
     local tabScroll = Instance.new("ScrollingFrame")
     tabScroll.Name = name
