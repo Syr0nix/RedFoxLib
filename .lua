@@ -107,18 +107,24 @@ function RedFoxUILib.NewTab(name)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.TextColor3 = Color3.fromRGB(255, 0, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.BorderSizePixel = 0
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
     btn.AutoButtonColor = false
-    btn.Parent = TabBarScroll
+    btn.ZIndex = 2
+
+    local uicorner = Instance.new("UICorner", btn)
+    uicorner.CornerRadius = UDim.new(0, 6)
 
     btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
+        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     end)
     btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
+        if RedFoxUILib.ActiveTab ~= RedFoxUILib.Tabs[name] then
+            btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        end
     end)
+
+    btn.Parent = TabBarScroll
 
     local tabScroll = Instance.new("ScrollingFrame")
     tabScroll.Name = name
@@ -137,18 +143,28 @@ function RedFoxUILib.NewTab(name)
     RedFoxUILib.Tabs[name] = tabScroll
 
     btn.MouseButton1Click:Connect(function()
-        for _, v in pairs(RedFoxUILib.Tabs) do v.Visible = false end
+        for tabName, frame in pairs(RedFoxUILib.Tabs) do
+            frame.Visible = false
+            for _, b in ipairs(TabBarScroll:GetChildren()) do
+                if b:IsA("TextButton") then
+                    b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+                end
+            end
+        end
         tabScroll.Visible = true
+        btn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         RedFoxUILib.ActiveTab = tabScroll
     end)
 
     if not RedFoxUILib.ActiveTab then
         tabScroll.Visible = true
+        btn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         RedFoxUILib.ActiveTab = tabScroll
     end
 
     return tabScroll
 end
+
 
 -- Dragging logic
 local dragging, dragStart, startPos
