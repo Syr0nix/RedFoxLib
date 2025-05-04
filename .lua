@@ -64,6 +64,27 @@ function RedFoxUILib:CreateWindow(title)
 	contentFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 	Instance.new("UICorner", contentFrame).CornerRadius = UDim.new(0, 6)
 
+	-- Notification popup
+	local popup = Instance.new("TextLabel", screenGui)
+	popup.Size = UDim2.new(0, 250, 0, 30)
+	popup.Position = UDim2.new(0, 10, 1, -40)
+	popup.Text = "RedFoxUI made By Syr0nix"
+	popup.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	popup.TextColor3 = Color3.fromRGB(255, 0, 0)
+	popup.Font = Enum.Font.GothamBold
+	popup.TextSize = 14
+	popup.TextXAlignment = Enum.TextXAlignment.Left
+	popup.BackgroundTransparency = 0.2
+	popup.AnchorPoint = Vector2.new(0, 1)
+	popup.Visible = true
+	Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 6)
+	Instance.new("UIStroke", popup).Color = Color3.fromRGB(60, 0, 0)
+
+	task.spawn(function()
+		wait(5)
+		if popup then popup:Destroy() end
+	end)
+
 	local currentTab
 
 	local function switchTab(tabFrame)
