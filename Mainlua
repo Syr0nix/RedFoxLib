@@ -1,4 +1,4 @@
--- RedFoxUILib - Full UI Library (Reloadable with task.wait)
+-- RedFoxUILib - Modern Reloadable UI Library
 
 local RedFoxUILib = {}
 local TweenService = game:GetService("TweenService")
@@ -6,105 +6,93 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local Lighting = game:GetService("Lighting")
 
--- Remove existing UI if it exists
-local existing = CoreGui:FindFirstChild("RedFoxUI")
-if existing then existing:Destroy() end
+-- Clear existing UI
+pcall(function()
+	local old = CoreGui:FindFirstChild("RedFoxUI")
+	if old then old:Destroy() end
+end)
 
 -- Blur Effect
-local blur = Instance.new("BlurEffect", Lighting)
+local blur = Instance.new("BlurEffect")
 blur.Size = 18
 blur.Enabled = true
+blur.Parent = Lighting
+
 coroutine.wrap(function()
 	task.wait(5)
-	TweenService:Create(blur, TweenInfo.new(0.54), {Size = 0}):Play()
-	task.wait(0.54)
+	TweenService:Create(blur, TweenInfo.new(0.5), {Size = 0}):Play()
+	task.wait(0.5)
 	blur.Enabled = false
 end)()
 
--- GUI Base
+-- Main UI Setup
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "RedFoxUI"
-ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = CoreGui
 
--- Main Frame
 local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 700, 0, 450)
-MainFrame.Position = UDim2.new(0.5, -350, 0.5, -225)
+MainFrame.Size = UDim2.new(0, 720, 0, 480)
+MainFrame.Position = UDim2.new(0.5, -360, 0.5, -240)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true
-MainFrame.ZIndex = 2
 MainFrame.Parent = ScreenGui
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
-
--- Shadow
-local shadow = Instance.new("ImageLabel")
-shadow.Name = "Shadow"
-shadow.Image = "rbxassetid://1316045217"
-shadow.ImageTransparency = 0.7
-shadow.Size = UDim2.new(1, 60, 1, 60)
-shadow.Position = UDim2.new(0.5, -30, 0.5, -30)
-shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-shadow.BackgroundTransparency = 1
-shadow.ZIndex = 1
-shadow.Parent = MainFrame
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
 -- Header
 local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Header.Size = UDim2.new(1, 0, 0, 45)
+Header.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 Header.BorderSizePixel = 0
 Header.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
 Title.Text = "RedFoxUI"
+Title.Size = UDim2.new(1, 0, 1, 0)
+Title.Position = UDim2.new(0, 10, 0, 0)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 20
+Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 10, 0, 0)
-Title.Size = UDim2.new(1, 0, 1, 0)
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
 -- Tab Bar
-local TabBarScroll = Instance.new("ScrollingFrame")
-TabBarScroll.Size = UDim2.new(1, 0, 0, 35)
-TabBarScroll.Position = UDim2.new(0, 0, 0, 40)
-TabBarScroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-TabBarScroll.BorderSizePixel = 0
-TabBarScroll.ScrollBarThickness = 4
-TabBarScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
-TabBarScroll.ScrollingDirection = Enum.ScrollingDirection.X
-TabBarScroll.HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-TabBarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-TabBarScroll.Parent = MainFrame
+local TabBar = Instance.new("ScrollingFrame")
+TabBar.Size = UDim2.new(1, 0, 0, 40)
+TabBar.Position = UDim2.new(0, 0, 0, 45)
+TabBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+TabBar.ScrollBarThickness = 4
+TabBar.ScrollingDirection = Enum.ScrollingDirection.X
+TabBar.AutomaticCanvasSize = Enum.AutomaticSize.X
+TabBar.CanvasSize = UDim2.new(0, 0, 0, 0)
+TabBar.BorderSizePixel = 0
+TabBar.Parent = MainFrame
 
-local TabLayout = Instance.new("UIListLayout", TabBarScroll)
+local TabLayout = Instance.new("UIListLayout")
 TabLayout.FillDirection = Enum.FillDirection.Horizontal
 TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-TabLayout.Padding = UDim.new(0, 6)
+TabLayout.Padding = UDim.new(0, 5)
+TabLayout.Parent = TabBar
 
--- Content Frame
+-- Content Area
 local ContentFrame = Instance.new("Frame")
-ContentFrame.Size = UDim2.new(1, 0, 1, -75)
-ContentFrame.Position = UDim2.new(0, 0, 0, 75)
-ContentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ContentFrame.Size = UDim2.new(1, 0, 1, -90)
+ContentFrame.Position = UDim2.new(0, 0, 0, 85)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 ContentFrame.BorderSizePixel = 0
 ContentFrame.ClipsDescendants = true
 ContentFrame.Parent = MainFrame
 
--- Hover FX
-local function AddHoverEffect(obj, baseColor, hoverColor)
+-- Hover effect helper
+local function AddHover(obj, base, hover)
 	obj.MouseEnter:Connect(function()
-		TweenService:Create(obj, TweenInfo.new(0.15), {BackgroundColor3 = hoverColor}):Play()
+		TweenService:Create(obj, TweenInfo.new(0.15), {BackgroundColor3 = hover}):Play()
 	end)
 	obj.MouseLeave:Connect(function()
-		TweenService:Create(obj, TweenInfo.new(0.15), {BackgroundColor3 = baseColor}):Play()
+		TweenService:Create(obj, TweenInfo.new(0.15), {BackgroundColor3 = base}):Play()
 	end)
 end
 
@@ -112,52 +100,52 @@ RedFoxUILib.Tabs = {}
 RedFoxUILib.CurrentTab = nil
 
 function RedFoxUILib.NewTab(name)
-	local btn = Instance.new("TextButton")
-	btn.Text = name
-	btn.Size = UDim2.new(0, 100, 1, 0)
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 14
-	btn.TextColor3 = Color3.fromRGB(255, 0, 0)
-	btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	btn.BorderSizePixel = 0
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-	btn.Parent = TabBarScroll
-	AddHoverEffect(btn, Color3.fromRGB(30, 30, 30), Color3.fromRGB(60, 0, 0))
+	local tabBtn = Instance.new("TextButton")
+	tabBtn.Text = name
+	tabBtn.Size = UDim2.new(0, 100, 1, 0)
+	tabBtn.Font = Enum.Font.GothamBold
+	tabBtn.TextSize = 14
+	tabBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+	tabBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	tabBtn.BorderSizePixel = 0
+	Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 6)
+	tabBtn.Parent = TabBar
+	AddHover(tabBtn, Color3.fromRGB(30, 30, 30), Color3.fromRGB(60, 0, 0))
 
-	local tabScroll = Instance.new("ScrollingFrame")
-	tabScroll.Name = name
-	tabScroll.BackgroundTransparency = 1
-	tabScroll.Size = UDim2.new(1, 0, 1, 0)
-	tabScroll.Position = UDim2.new(0, 0, 0, 0)
-	tabScroll.Visible = false
-	tabScroll.ScrollBarThickness = 6
-	tabScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	tabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-	tabScroll.ClipsDescendants = true
-	tabScroll.Parent = ContentFrame
+	local scroll = Instance.new("ScrollingFrame")
+	scroll.Name = name
+	scroll.Size = UDim2.new(1, 0, 1, 0)
+	scroll.BackgroundTransparency = 1
+	scroll.BorderSizePixel = 0
+	scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	scroll.ScrollBarThickness = 6
+	scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	scroll.Visible = false
+	scroll.Parent = ContentFrame
 
 	local layout = Instance.new("UIListLayout")
 	layout.Padding = UDim.new(0, 6)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Parent = tabScroll
+	layout.Parent = scroll
 
-	RedFoxUILib.Tabs[name] = tabScroll
-
-	btn.MouseButton1Click:Connect(function()
-		for _, v in pairs(RedFoxUILib.Tabs) do
-			v.Visible = false
+	RedFoxUILib.Tabs[name] = scroll
+	tabBtn.MouseButton1Click:Connect(function()
+		for _, t in pairs(RedFoxUILib.Tabs) do
+			t.Visible = false
 		end
-		tabScroll.Visible = true
+		scroll.Visible = true
+		RedFoxUILib.CurrentTab = scroll
 	end)
 
 	if not RedFoxUILib.CurrentTab then
-		tabScroll.Visible = true
-		RedFoxUILib.CurrentTab = tabScroll
+		scroll.Visible = true
+		RedFoxUILib.CurrentTab = scroll
 	end
 
-	return tabScroll
+	return scroll
 end
 
+-- Component loader
 function RedFoxUILib.Load(tab, config)
 	for _, item in ipairs(config) do
 		if item.type == "button" then
@@ -165,11 +153,11 @@ function RedFoxUILib.Load(tab, config)
 		elseif item.type == "toggle" then
 			RedFoxUILib.CreateToggle(tab, item.text, item.default or false, item.callback)
 		elseif item.type == "slider" then
-			RedFoxUILib.CreateSlider(tab, item.text, item.min, item.max, item.default, item.callback)
+			RedFoxUILib.CreateSlider(tab, item.text, item.min, item.max, item.default or item.min, item.callback)
 		elseif item.type == "textbox" then
 			RedFoxUILib.CreateTextbox(tab, item.text, item.default or "", item.callback)
 		elseif item.type == "dropdown" then
-			RedFoxUILib.CreateDropdown(tab, item.text, item.options, item.callback)
+			RedFoxUILib.CreateDropdown(tab, item.text, item.options or {}, item.callback)
 		elseif item.type == "line" then
 			RedFoxUILib.CreateLine(tab)
 		end
