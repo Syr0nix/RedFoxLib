@@ -61,8 +61,9 @@ Line1.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 Line1.BorderSizePixel = 0
 Line1.Parent = Header
 
--- Tab Bar
+-- Tab Bar Scroll Frame
 local TabBarScroll = Instance.new("ScrollingFrame")
+TabBarScroll.Name = "TabBar"
 TabBarScroll.Size = UDim2.new(1, 0, 0, 35)
 TabBarScroll.Position = UDim2.new(0, 0, 0, 40)
 TabBarScroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -74,6 +75,19 @@ TabBarScroll.ScrollingDirection = Enum.ScrollingDirection.X
 TabBarScroll.HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar
 TabBarScroll.ClipsDescendants = true
 TabBarScroll.Parent = MainFrame
+
+-- 🔴 Container for tab buttons (so layout works correctly)
+local TabButtonHolder = Instance.new("Frame")
+TabButtonHolder.Name = "TabButtonHolder"
+TabButtonHolder.Size = UDim2.new(1, 0, 1, 0)
+TabButtonHolder.BackgroundTransparency = 1
+TabButtonHolder.AutomaticSize = Enum.AutomaticSize.X
+TabButtonHolder.Parent = TabBarScroll
+
+local TabLayout = Instance.new("UIListLayout", TabButtonHolder)
+TabLayout.FillDirection = Enum.FillDirection.Horizontal
+TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabLayout.Padding = UDim.new(0, 6)
 
 local TabLayout = Instance.new("UIListLayout", TabBarScroll)
 TabLayout.FillDirection = Enum.FillDirection.Horizontal
@@ -124,7 +138,7 @@ function RedFoxUILib.NewTab(name)
         end
     end)
 
-    btn.Parent = TabBarScroll
+btn.Parent = TabButtonHolder
 task.defer(function()
 	TabBarScroll.CanvasPosition = Vector2.new(0, 0)
 end)
