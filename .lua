@@ -1,4 +1,4 @@
--- ✅ RedFoxUILib - Full Working UI Library with Tab Fix, Blur Fade, and Visual Polish
+-- ✅ RedFoxUILib - Full Working UI Library with Scroll Layout (Fixed Tabs, Blur, Sizing, Controls)
 
 if game.CoreGui:FindFirstChild("RedFoxUI") then return end
 
@@ -13,11 +13,14 @@ local blur = Instance.new("BlurEffect", Lighting)
 blur.Size = 18
 blur.Enabled = true
 
--- Auto disable blur after 5 seconds
-coroutine.wrap(function()
-    task.wait(5)
-    if blur then blur.Enabled = false end
-end)()
+-- Fade out blur after 5 seconds
+task.delay(5, function()
+    for i = blur.Size, 0, -1 do
+        blur.Size = i
+        task.wait(0.03)
+    end
+    blur.Enabled = false
+end)
 
 -- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
@@ -30,7 +33,7 @@ ScreenGui.Parent = CoreGui
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 700, 0, 450)
 MainFrame.Position = UDim2.new(0.5, -350, 0.5, -225)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 MainFrame.BorderSizePixel = 0
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Parent = ScreenGui
@@ -54,16 +57,8 @@ Title.Size = UDim2.new(1, 0, 1, 0)
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
-local Line1 = Instance.new("Frame")
-Line1.Size = UDim2.new(1, 0, 0, 1)
-Line1.Position = UDim2.new(0, 0, 1, 0)
-Line1.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-Line1.BorderSizePixel = 0
-Line1.Parent = Header
-
--- Tab Bar Scroll Frame
+-- Tab Bar
 local TabBarScroll = Instance.new("ScrollingFrame")
-TabBarScroll.Name = "TabBar"
 TabBarScroll.Size = UDim2.new(1, 0, 0, 35)
 TabBarScroll.Position = UDim2.new(0, 0, 0, 40)
 TabBarScroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -73,39 +68,18 @@ TabBarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 TabBarScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
 TabBarScroll.ScrollingDirection = Enum.ScrollingDirection.X
 TabBarScroll.HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-TabBarScroll.ClipsDescendants = true
 TabBarScroll.Parent = MainFrame
-
--- 🔴 Container for tab buttons (so layout works correctly)
-local TabButtonHolder = Instance.new("Frame")
-TabButtonHolder.Name = "TabButtonHolder"
-TabButtonHolder.Size = UDim2.new(1, 0, 1, 0)
-TabButtonHolder.BackgroundTransparency = 1
-TabButtonHolder.AutomaticSize = Enum.AutomaticSize.X
-TabButtonHolder.Parent = TabBarScroll
-
-local TabLayout = Instance.new("UIListLayout", TabButtonHolder)
-TabLayout.FillDirection = Enum.FillDirection.Horizontal
-TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-TabLayout.Padding = UDim.new(0, 6)
 
 local TabLayout = Instance.new("UIListLayout", TabBarScroll)
 TabLayout.FillDirection = Enum.FillDirection.Horizontal
 TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 TabLayout.Padding = UDim.new(0, 6)
 
-local Line2 = Instance.new("Frame")
-Line2.Size = UDim2.new(1, 0, 0, 1)
-Line2.Position = UDim2.new(0, 0, 1, 0)
-Line2.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-Line2.BorderSizePixel = 0
-Line2.Parent = TabBarScroll
-
 -- Content Holder
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Size = UDim2.new(1, 0, 1, -75)
 ContentFrame.Position = UDim2.new(0, 0, 0, 75)
-ContentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 ContentFrame.BorderSizePixel = 0
 ContentFrame.ClipsDescendants = true
 ContentFrame.Parent = MainFrame
@@ -121,28 +95,10 @@ function RedFoxUILib.NewTab(name)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.TextColor3 = Color3.fromRGB(255, 0, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     btn.BorderSizePixel = 0
-    btn.AutoButtonColor = false
-    btn.ZIndex = 2
-
-    local uicorner = Instance.new("UICorner", btn)
-    uicorner.CornerRadius = UDim.new(0, 6)
-
-    btn.MouseEnter:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    end)
-    btn.MouseLeave:Connect(function()
-        if RedFoxUILib.ActiveTab ~= RedFoxUILib.Tabs[name] then
-            btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        end
-    end)
-
-btn.Parent = TabButtonHolder
-task.defer(function()
-	TabBarScroll.CanvasPosition = Vector2.new(0, 0)
-end)
-
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    btn.Parent = TabBarScroll
 
     local tabScroll = Instance.new("ScrollingFrame")
     tabScroll.Name = name
@@ -161,28 +117,67 @@ end)
     RedFoxUILib.Tabs[name] = tabScroll
 
     btn.MouseButton1Click:Connect(function()
-        for tabName, frame in pairs(RedFoxUILib.Tabs) do
-            frame.Visible = false
-            for _, b in ipairs(TabBarScroll:GetChildren()) do
-                if b:IsA("TextButton") then
-                    b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-                end
-            end
-        end
+        for _, v in pairs(RedFoxUILib.Tabs) do v.Visible = false end
         tabScroll.Visible = true
-        btn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         RedFoxUILib.ActiveTab = tabScroll
     end)
 
     if not RedFoxUILib.ActiveTab then
         tabScroll.Visible = true
-        btn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         RedFoxUILib.ActiveTab = tabScroll
     end
 
     return tabScroll
 end
 
+-- Add Slider
+function RedFoxUILib.CreateSlider(tab, label, min, max, default, callback)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, -12, 0, 50)
+    container.BackgroundTransparency = 1
+    container.Parent = tab
+
+    local text = Instance.new("TextLabel")
+    text.Text = label .. ": " .. default
+    text.Font = Enum.Font.GothamBold
+    text.TextSize = 14
+    text.TextColor3 = Color3.fromRGB(255, 0, 0)
+    text.Size = UDim2.new(1, 0, 0, 20)
+    text.BackgroundTransparency = 1
+    text.Parent = container
+
+    local slider = Instance.new("TextButton")
+    slider.Size = UDim2.new(1, 0, 0, 20)
+    slider.Position = UDim2.new(0, 0, 0, 25)
+    slider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    slider.Text = ""
+    slider.AutoButtonColor = false
+    slider.Parent = container
+
+    local fill = Instance.new("Frame")
+    fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+    fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    fill.BorderSizePixel = 0
+    fill.Parent = slider
+
+    local dragging = false
+    slider.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local rel = input.Position.X - slider.AbsolutePosition.X
+            local pct = math.clamp(rel / slider.AbsoluteSize.X, 0, 1)
+            fill.Size = UDim2.new(pct, 0, 1, 0)
+            local val = math.floor(min + (max - min) * pct)
+            text.Text = label .. ": " .. val
+            callback(val)
+        end
+    end)
+end
 
 -- Dragging logic
 local dragging, dragStart, startPos
